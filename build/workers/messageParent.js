@@ -39,7 +39,13 @@ function messageParent(message, parentProcess = process) {
 
     parentPort.postMessage([_types().PARENT_MESSAGE_CUSTOM, message]);
   } else if (typeof parentProcess.send === 'function') {
-    parentProcess.send([_types().PARENT_MESSAGE_CUSTOM, message]);
+    try {
+      parentProcess.send([_types().PARENT_MESSAGE_CUSTOM, message]);
+    } catch (error) {
+      console.error('jest-worker message serialization failed', error);
+      console.dir(message, {depth: 10});
+      throw error;
+    }
   } else {
     throw new Error('"messageParent" can only be used inside a worker');
   }
